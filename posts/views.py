@@ -26,8 +26,27 @@ def show(request):
     posts = Post.objects.all()
 
     return render(request,'posts/index.html',{'posts':posts})
-@login_required
+
+
+@login_required(login_url='/accounts/login')
 def details(request,id):
     post = Post.objects.get(pk = id)
     return render(request,'posts/post.html',{'post':post})
 
+
+@login_required(login_url='/accounts/login')
+def edit(request,id):
+    if request.method == 'POST':
+        form = PostForm(request.POST)
+        if form.is_valid():
+            Post.objects.filter(pk=id).update(title = request.POST['title'],body = request.POST['body'])
+            return redirect('post',id)
+    post = Post.objects.get(pk = id)
+    form = PostForm(instance=post)
+    return render(request,'posts/editPost.html',{'form':form})
+
+
+@login_required(login_url='/accounts/login')
+def delete(request,id):
+    Post.objects.filter(pk=id).delete()
+    return redirect("posts")
